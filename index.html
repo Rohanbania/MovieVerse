@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MovieVerse - Premium Cinema Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        body {
+            background: radial-gradient(circle at center, #0a0a0a 0%, #000 100%);
+            color: white;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: rgba(20, 20, 20, 0.8);
+            border-radius: 15px;
+            border: 1px solid #e50914;
+            box-shadow: 0 0 30px rgba(229, 9, 20, 0.2);
+            transform: translateY(-50px);
+            opacity: 0;
+            transition: all 0.8s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(229,9,20,0.1) 0%, transparent 70%);
+            z-index: -1;
+        }
+        header.animate {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #e50914, #ff6b6b, #e50914);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 15px rgba(229, 9, 20, 0.5);
+            letter-spacing: 1px;
+        }
+        .search-container {
+            margin: 30px auto;
+            max-width: 600px;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all 0.8s 0.3s;
+        }
+        .search-container.animate {
+            transform: scale(1);
+            opacity: 1;
+        }
+        #search {
+            width: 100%;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 50px;
+            background: rgba(40, 40, 40, 0.8);
+            color: white;
+            font-size: 1.1rem;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+            border: 1px solid #333;
+        }
+        #search:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(229, 9, 20, 0.3);
+            border-color: #e50914;
+        }
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 30px;
+            padding: 30px 0;
+        }
+        .movie-poster {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            transform: scale(0.95) translateY(30px);
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            filter: brightness(0.95);
+            z-index: 1;
+            border: 1px solid #333;
+        }
+        .movie-poster::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(229, 9, 20, 0.2), rgba(0, 0, 0, 0.6));
+            opacity: 0;
+            transition: opacity 0.4s;
+            z-index: 2;
+        }
+        .movie-poster.animate {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+        .movie-poster:hover {
+            transform: scale(1.03) !important;
+            box-shadow: 0 15px 35px rgba(229, 9, 20, 0.4);
+            filter: brightness(1.1);
+            z-index: 10;
+            border-color: #e50914;
+        }
+        .movie-poster:hover::before {
+            opacity: 1;
+        }
+        .movie-poster img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s;
+        }
+        .movie-poster:hover img {
+            transform: scale(1.08);
+        }
+        .movie-title {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.95));
+            padding: 25px 15px 15px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.4s;
+            z-index: 3;
+        }
+        .movie-poster:hover .movie-title {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .movie-title h3 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+        .movie-title p {
+            font-size: 0.95rem;
+            color: #ddd;
+        }
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(229, 9, 20, 0.9);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 4;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .movie-poster:hover .delete-btn {
+            opacity: 1;
+        }
+        .no-results {
+            text-align: center;
+            grid-column: 1 / -1;
+            padding: 50px;
+            color: #777;
+            font-size: 1.3rem;
+        }
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 30px;
+            color: #777;
+            transform: translateY(50px);
+            opacity: 0;
+            transition: all 0.8s;
+        }
+        footer.animate {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        /* ADMIN BUTTON */
+        .admin-toggle {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: #e50914;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 999;
+            box-shadow: 0 0 20px rgba(229, 9, 20, 0.6);
+            font-size: 24px;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: 2px solid white;
+        }
+        .admin-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(229, 9, 20, 0.8);
+        }
+        .admin-panel {
+            position: fixed;
+            bottom: 100px;
+            right: 25px;
+            background: rgba(30, 30, 30, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.7);
+            z-index: 1000;
+            width: 350px;
+            display: none;
+            border: 1px solid #e50914;
+            backdrop-filter: blur(10px);
+        }
+        .admin-panel h3 {
+            color: #e50914;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.5rem;
+            text-shadow: 0 0 10px rgba(229, 9, 20, 0.3);
+        }
+        .admin-panel input {
+            display: block;
+            margin: 15px 0;
+            padding: 12px 15px;
+            width: 100%;
+            background: rgba(50, 50, 50, 0.8);
+            border: 1px solid #444;
+            color: white;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        .admin-panel button {
+            background: linear-gradient(45deg, #e50914, #c40812);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        .admin-panel button:hover {
+            background: linear-gradient(45deg, #ff1a1a, #e50914);
+            transform: translateY(-2px);
+        }
+        .password-prompt {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(30, 30, 30, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.9);
+            z-index: 1001;
+            border: 1px solid #e50914;
+            display: none;
+            backdrop-filter: blur(10px);
+            width: 90%;
+            max-width: 400px;
+        }
+        .password-prompt h3 {
+            color: #e50914;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+        .password-prompt input {
+            padding: 15px;
+            margin: 20px 0;
+            width: 100%;
+            background: rgba(50, 50, 50, 0.8);
+            border: 1px solid #444;
+            color: white;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        .password-prompt button {
+            background: linear-gradient(45deg, #e50914, #c40812);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+        .password-prompt button:hover {
+            background: linear-gradient(45deg, #ff1a1a, #e50914);
+        }
+        #passwordError {
+            color: #e50914;
+            display: none;
+            margin-top: 15px;
+            text-align: center;
+            font-size: 1rem;
+        }
+        /* CINEMA LIGHTS EFFECT */
+        .cinema-lights {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 20px;
+            background: linear-gradient(180deg, rgba(229,9,20,0.3) 0%, transparent 100%);
+            z-index: 9999;
+            pointer-events: none;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="cinema-lights"></div>
+    
+    <header>
+        <h1>MovieVerse</h1>
+        <p>Your premium cinema experience</p>
+    </header>
+    
+    <div class="search-container">
+        <input type="text" id="search" placeholder="Search movies...">
+    </div>
+    
+    <div class="movie-grid" id="movieGrid"></div>
+    
+    <footer>
+        <p>© 2023 MovieVerse | Premium Cinema Collection</p>
+    </footer>
+    
+    <!-- ADMIN BUTTON -->
+    <div class="admin-toggle" id="adminToggle">+</div>
+    
+    <!-- ADMIN PANEL -->
+    <div class="admin-panel" id="adminPanel">
+        <h3>Admin Dashboard</h3>
+        <input type="text" id="newTitle" placeholder="Movie Title (Required)">
+        <input type="text" id="newYear" placeholder="Year (Optional)">
+        <input type="text" id="newPoster" placeholder="Poster Image URL (Required)">
+        <input type="text" id="newLink" placeholder="IMDb/Website URL (Required)">
+        <input type="text" id="newRating" placeholder="Rating (e.g., ⭐ 8.5/10)">
+        <button onclick="addNewMovie()">Add Movie</button>
+    </div>
+    
+    <!-- PASSWORD PROMPT -->
+    <div class="password-prompt" id="passwordPrompt">
+        <h3>Admin Authentication</h3>
+        <input type="password" id="passwordInput" placeholder="Enter admin password">
+        <button onclick="checkPassword()">Unlock Admin</button>
+        <p id="passwordError">Incorrect password!</p>
+    </div>
+
+    <script>
+        // Movie data
+        let movies = [
+            {
+                title: "The Shawshank Redemption",
+                year: "1994",
+                poster: "https://m.media-amazon.com/images/M/MV5BNDE3ODcxYzMtY2YzZC00NmNlLWJiNDMtZDViZWM2MzIxZDYwXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_FMjpg_UX1000_.jpg",
+                link: "https://www.imdb.com/title/tt0111161/",
+                rating: "⭐ 9.3/10"
+            },
+            {
+                title: "The Godfather",
+                year: "1972",
+                poster: "https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",
+                link: "https://www.imdb.com/title/tt0068646/",
+                rating: "⭐ 9.2/10"
+            },
+            {
+                title: "The Dark Knight",
+                year: "2008",
+                poster: "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_.jpg",
+                link: "https://www.imdb.com/title/tt0468569/",
+                rating: "⭐ 9.0/10"
+            }
+        ];
+
+        // Password Configuration
+        const ADMIN_PASSWORD = "@$77861822Aa&@";
+        let adminMode = false;
+
+        // Initialize
+        function initializePage() {
+            document.querySelector('header').classList.add('animate');
+            document.querySelector('.search-container').classList.add('animate');
+            
+            const savedMovies = localStorage.getItem('movieGallery');
+            if (savedMovies) movies = JSON.parse(savedMovies);
+            
+            displayMovies(movies);
+            observer.observe(document.querySelector('footer'));
+        }
+
+        // Display movies with delete buttons
+        function displayMovies(movieList) {
+            const movieGrid = document.getElementById('movieGrid');
+            movieGrid.innerHTML = '';
+            
+            if (movieList.length === 0) {
+                movieGrid.innerHTML = '<div class="no-results">No movies found matching your search.</div>';
+                return;
+            }
+            
+            movieList.forEach((movie, index) => {
+                const movieElement = document.createElement('div');
+                movieElement.className = 'movie-poster';
+                movieElement.innerHTML = `
+                    <img src="${movie.poster}" alt="${movie.title}" loading="lazy">
+                    <div class="movie-title">
+                        <h3>${movie.title}</h3>
+                        <p>${movie.year || ''} ${movie.year && movie.rating ? '|' : ''} ${movie.rating || ''}</p>
+                    </div>
+                    ${adminMode ? `<button class="delete-btn" onclick="deleteMovie(${index})">×</button>` : ''}
+                `;
+                movieElement.style.transitionDelay = `${index * 0.1}s`;
+                
+                movieElement.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('delete-btn')) {
+                        window.open(movie.link, '_blank');
+                    }
+                });
+                
+                movieGrid.appendChild(movieElement);
+            });
+            
+            setTimeout(() => {
+                document.querySelectorAll('.movie-poster').forEach(poster => {
+                    observer.observe(poster);
+                });
+            }, 100);
+        }
+
+        // Delete movie function
+        function deleteMovie(index) {
+            if (confirm(`Delete "${movies[index].title}" permanently?`)) {
+                movies.splice(index, 1);
+                localStorage.setItem('movieGallery', JSON.stringify(movies));
+                displayMovies(movies);
+            }
+        }
+
+        // Intersection Observer
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        // Search functionality
+        let searchTimeout;
+        document.getElementById('search').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredMovies = movies.filter(movie => 
+                    movie.title.toLowerCase().includes(searchTerm) ||
+                    (movie.year && movie.year.includes(searchTerm)) ||
+                    (movie.rating && movie.rating.toLowerCase().includes(searchTerm))
+                );
+                displayMovies(filteredMovies);
+            }, 300);
+        });
+
+        // Admin Functions
+        document.getElementById('adminToggle').addEventListener('click', () => {
+            if(adminMode) {
+                document.getElementById('adminPanel').style.display = 
+                    document.getElementById('adminPanel').style.display === 'block' ? 'none' : 'block';
+            } else {
+                showPasswordPrompt();
+            }
+        });
+
+        function showPasswordPrompt() {
+            document.getElementById('passwordPrompt').style.display = 'block';
+            document.getElementById('passwordInput').focus();
+            document.getElementById('passwordError').style.display = 'none';
+        }
+
+        function checkPassword() {
+            const input = document.getElementById('passwordInput').value;
+            if(input === ADMIN_PASSWORD) {
+                adminMode = true;
+                document.getElementById('passwordPrompt').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'block';
+                displayMovies(movies); // Refresh to show delete buttons
+            } else {
+                document.getElementById('passwordError').style.display = 'block';
+            }
+            document.getElementById('passwordInput').value = '';
+        }
+
+        function addNewMovie() {
+            const newMovie = {
+                title: document.getElementById('newTitle').value,
+                year: document.getElementById('newYear').value,
+                poster: document.getElementById('newPoster').value,
+                link: document.getElementById('newLink').value,
+                rating: document.getElementById('newRating').value
+            };
+            
+            if (newMovie.title && newMovie.poster && newMovie.link) {
+                movies.unshift(newMovie);
+                localStorage.setItem('movieGallery', JSON.stringify(movies));
+                displayMovies(movies);
+                
+                // Clear inputs
+                ['newTitle', 'newYear', 'newPoster', 'newLink', 'newRating'].forEach(id => {
+                    document.getElementById(id).value = '';
+                });
+                
+                document.getElementById('adminPanel').style.display = 'none';
+            } else {
+                alert('Please fill all required fields!');
+            }
+        }
+
+        // Initialize page
+        window.addEventListener('DOMContentLoaded', initializePage);
+    </script>
+</body>
+</html>
